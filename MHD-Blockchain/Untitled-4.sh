@@ -1,0 +1,1 @@
+scp -r . username@server_ip:/path/to/destinationscp -r . username@server_ip:/path/to/destination
