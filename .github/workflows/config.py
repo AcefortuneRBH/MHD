@@ -1,0 +1,3 @@
+BLOCK_TIME = 10  # Seconds per block
+DIFFICULTY_ADJUSTMENT_INTERVAL = 10  # Blocks
+INITIAL_REWARD = 50  # MC per block
