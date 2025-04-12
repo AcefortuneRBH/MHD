@@ -1,0 +1,29 @@
+name: mhd-blockchain
+services:
+  - name: mhd-node
+    github:
+      repo: your-github-user/mhd-blockchain
+      branch: main
+    run_command: ./mhdd start
+    build_command: make install
+    source_dir: .
+    dockerfile_path: Dockerfile
+    envs:
+      - key: CHAIN_ID
+        value: mhdchain
+      - key: MONIKER
+        value: mhdnode01
+      - key: LOG_LEVEL
+        value: info
+    http_port: 26657
+    internal_ports:
+      - 26656 # P2P
+      - 26657 # RPC
+      - 1317  # REST API (if enabled)
+      - 9090  # gRPC (if enabled)
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    routes:
+      - path: /
+        preserve_path: true
+        redirect_to: /status
