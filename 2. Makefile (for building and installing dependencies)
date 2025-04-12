@@ -1,0 +1,24 @@
+# Set the default Go binary installation path
+GOBIN=$(GOPATH)/bin
+
+# Install dependencies and build the binary
+install:
+	@echo "Building and installing MHD Blockchain"
+	GO111MODULE=on go mod tidy
+	GO111MODULE=on go mod vendor
+	GO111MODULE=on go install ./cmd/mhdd
+
+# Clean build and vendor directories
+clean:
+	@echo "Cleaning build files"
+	rm -rf $(GOBIN)/mhdd
+
+# Run tests (if applicable)
+test:
+	@echo "Running tests"
+	go test ./...
+
+# Run the binary in local development (or use `make install` to deploy)
+run:
+	@echo "Running the MHD Blockchain"
+	./mhdd start
