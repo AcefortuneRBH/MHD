@@ -45,5 +45,5 @@ jobs:
         if: ${{ github.event.inputs.environment == 'production' }}
         uses: digitalocean/app-action@v2
         with: [f79c6c07ac59d1027244b95a0f694aa1417d626bcb9f054c22e8981a3fd9b573]
-          app_name: 'mhd-app9'
+          app_name: 'mahdicoin-app'
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
