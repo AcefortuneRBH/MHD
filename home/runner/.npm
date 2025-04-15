@@ -1,0 +1,8 @@
+Run actions/setup-node@v4
+  with:
+    node-version: 18.x
+    cache: npm
+    always-auth: false
+    check-latest: false
+    token: ***
+Found in cache @ /opt/hostedtoolcache/node/18.20.
