@@ -1,0 +1,81 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+    # Inputs the workflow accepts.
+    inputs:        
+  uses:
+  with:
+    # Version range or exact version of Python or PyPy to use, using SemVer's version range syntax. Reads from .python-version if unset.
+    python-version: # optional
+    # File containing the Python version to use. Example: .python-version
+    python-version-file: # optional
+    # Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.
+    cache: # optional
+    # The target architecture (x86, x64) of the Python or PyPy interpreter.
+    architecture: # optional
+    # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+    check-latest: # optional
+    # The token used to authenticate when fetching Python distributions from https://github.com/actions/python-versions. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+    # Set this option if you want the action to update environment variables.
+    update-environment: # optional, default is true
+    # When 'true', a version range passed to 'python-version' input will match prerelease versions if no GA versions are found. Only 'x.y' version range is supported for CPython.
+    allow-prereleases: # optional
+                name:
+        # Friendly description to be shown in the UI instead of 'name'
+        description: 'Person to greet'
+        # Default value if no value is explicitly provided
+        default: 'World'
+        # Input has to be provided for the workflow to run
+        required: true
+        # The data type of the input
+        type: string
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  greet:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+    - name: Send greeting
+      run: echo "Hello ${{ inputs.name }}"
+            - name: Setup Python
+  uses: actions/setup-python@v4.9.0
+  with:
+    # Version range or exact version of Python or PyPy to use, using SemVer's version range syntax. Reads from .python-version if unset.
+    python-version: # optional
+    # File containing the Python version to use. Example: .python-version
+    python-version-file: # optional
+    # Used to specify a package manager for caching in the default directory. Supported values: pip, pipenv, poetry.
+    cache: # optional
+    # The target architecture (x86, x64) of the Python or PyPy interpreter.
+    architecture: # optional
+    # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+    check-latest: # optional
+    # The token used to authenticate when fetching Python distributions from https://github.com/actions/python-versions. When running this action on github.com, the default value is sufficient. When running on GHES, you can pass a personal access token for github.com if you are experiencing rate limiting.
+    token: # optional, default is ${{ github.server_url == 'https://github.com' && github.token || '' }}
+    # Used to specify the path to dependency files. Supports wildcards or a list of file names for caching multiple dependencies.
+    cache-dependency-path: # optional
+    # Set this option if you want the action to update environment variables.
+    update-environment: # optional, default is true
+    # When 'true', a version range passed to 'python-version' input will match prerelease versions if no GA versions are found. Only 'x.y' version range is supported for CPython.
+    allow-prereleases: # optional
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with:
+    python-version: '3.13'
+    cache: 'pip' # caching pip dependencies
+- run: pip install -r requirements.txt    
+- run: 
