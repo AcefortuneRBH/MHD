@@ -1,4 +1,4 @@
--name: Deploy MahdiCoin App (Production Approval)
+name: Deploy MahdiCoin App (Production Approval)
 
 on:
   workflow_dispatch:
