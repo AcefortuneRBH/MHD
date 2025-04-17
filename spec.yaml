@@ -1,0 +1,917 @@
+openapi: 3.0.0
+info:
+  title: DigitalOcean Droplet Metadata API
+  version: 0.1.9
+  description: >
+    The DigitalOcean Droplet Metadata API allows Droplets to access
+    its metadata. Examples of available Droplet metadata include user-provided
+    data (`user-data`), Droplet ID, data center region, IP addresses, and tags.
+    Aside from allowing an easy way for a user to look-up data about a Droplet,
+    metadata can be used to configure a Droplet and its applications.
+  license:
+    name: Apache 2.0
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+  contact:
+    name: DigitalOcean API Team
+    email: api-engineering@digitalocean.com
+  termsOfService: 'https://www.digitalocean.com/legal/terms-of-service-agreement/'
+servers:
+  - url: http://169.254.169.254
+    description: production
+tags:
+  - name: Droplet Properties
+    description: >-
+      Returns general information about the Droplet, including the Droplet's
+      region, hostname, and ID.
+  - name: Network Interfaces
+    description: >-
+      Droplets use public and [private network](https://www.digitalocean.com/docs/networking/vpc/)
+      interfaces to connect to the internet and other DigitalOcean resources. Each interface contains various
+      properties, including the Droplet's IP address, gateway IP, and netmask.
+  - name: Floating IPs
+    description: >-
+      DigitalOcean [Reserved IP addresses](https://www.digitalocean.com/docs/networking/floating-ips/)
+      are publicly-accessible static IP addresses that you can assign to
+      Droplets and instantly remap between other Droplets in the same datacenter.
+  - name: Reserved IPs
+    description: >-
+      DigitalOcean [Reserved IP addresses](https://www.digitalocean.com/docs/networking/floating-ips/)
+      are publicly-accessible static IP addresses that you can assign to
+      Droplets and instantly remap between other Droplets in the same datacenter.
+  - name: DNS
+    description: >-
+      Each Droplet's network configuration contains the IP addresses of DNS
+      resolvers that the Droplet uses to locate and connect to hostnames on the
+      internet.
+  - name: Tags
+    description: >-
+      [Tags are custom labels](https://www.digitalocean.com/docs/droplets/how-to/tag/)
+      you can apply to Droplets and other DigitalOcean resources.
+  - name: Features
+    description: >-
+      Droplets have features that can be enabled depending on the Droplet's
+      configuration.
+paths:
+  /metadata/v1.json:
+    get:
+      summary: Get Droplet's Metadata
+      operationId: getMetadata
+      description: >-
+        Returns the entire contents of Droplet's matadata, in JSON. This
+        endpoint is unique because it returns all of the metadata at once,
+        instead of individual metadata items.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: A JSON array of Droplet metadata.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/metadata'
+        '301':
+          $ref: '#/components/responses/MovedPermanently'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /metadata/v1:
+    get:
+      summary: Get Metadata Index
+      operationId: getMetadataIndex
+      description: >-
+        The top-level metadata index. This index can be navigated to find all
+        available Metadata endpoints.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: A list of metadata endpoints.
+          content:
+            text/plain:
+              example: |
+                  id
+                  hostname
+                  user-data
+                  vendor-data
+                  public-keys
+                  region
+                  interfaces/
+                  dns/
+                  floating_ip/
+                  reserved_ip/
+                  tags/
+                  features/
+  /metadata/v1/id:
+    get:
+      summary: Get Droplet ID
+      operationId: getDropletId
+      description: >-
+        The Droplet's unique identifier. This is automatically generated upon
+        Droplet creation.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: The Droplet's ID as an integer.
+          content:
+            text/plain:
+              example: "2756294"
+
+  /metadata/v1/hostname:
+    get:
+      summary: Get Hostname
+      operationId: getHostname
+      description: >-
+        The Droplet's hostname, as specified by the user during Droplet
+        creation.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: The Droplet's hostname as plain text.
+          content:
+            text/plain:
+              example: sample-droplet
+
+  /metadata/v1/user-data:
+    get:
+      summary: Get User Data
+      operationId: getUserData
+      description: >-
+        The user data that was provided by the user during Droplet creation.
+        User data can contain arbitrary data for miscellaneous use or, with
+        certain Linux distributions, an arbitrary shell script or cloud-config
+        file that will be consumed by a variation of cloud-init upon boot. At
+        this time, cloud-config support is included with Ubuntu 14.04,
+        and CentOS 7 images on DigitalOcean.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: The user data provided as plain text.
+          content:
+            text/plain:
+              example: |
+                #! /bin/bash
+                echo "Data from user"
+  /metadata/v1/vendor-data:
+    get:
+      summary: Get Vendor Data
+      operationId: getVendorData
+      description: >-
+        Vendor-provided data that can be used to configure Droplets upon their
+        creation. This is similar to user data, but it is provided by
+        DigitalOcean instead of the user.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: The vendor data provided as plain text.
+          content:
+            text/plain:
+              example: |
+                #cloud-config
+                disable_root: false
+                manage_etc_hosts: true
+                cloud_config_modules:
+                 - ssh
+                 - set_hostname
+                 - [ update_etc_hosts, once-per-instance ]
+                cloud_final_modules:
+                 - scripts-vendor
+                 - scripts-per-once
+                 - scripts-per-boot
+                 - scripts-per-instance
+                 - scripts-user
+  /metadata/v1/public-keys:
+    get:
+      summary: Get Public Keys
+      operationId: getPublicKeys
+      description: >-
+        Public SSH key(s) that were added to the Droplet's root user's
+        `authorized_keys` file during Droplet creation.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: The Droplet's public key in plain text.
+          content:
+            text/plain:
+              example: |
+                ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCcbi6cygCUmuNlB0KqzBpHXf7CFYb3VE4pDOf/RLJ8OFDjOM+fjF83a24QktSVIpQnHYpJJT2pQMBxD+ZmnhTbKv+OjwHSHwAfkBullAojgZKzz+oN35P4Ea4J78AvMrHw0zp5MknS+WKEDCA2c6iDRCq6/hZ13Mn64f6c372JK99X29lj/B4VQpKCQyG8PUSTFkb5DXTETGbzuiVft+vM6SF+0XZH9J6dQ7b4yD3sOder+M0Q7I7CJD4VpdVD/JFa2ycOS4A4dZhjKXzabLQXdkWHvYGgNPGA5lI73TcLUAueUYqdq3RrDRfaQ5Z0PEw0mDllCzhk5dQpkmmqNi0F sammy@digitalocean.com
+  /metadata/v1/region:
+    get:
+      summary: Get Region
+      operationId: getRegion
+      description: The region code of where the Droplet resides.
+      tags:
+        - Droplet Properties
+      responses:
+        '200':
+          description: The Droplet's region as plain text.
+          content:
+            text/plain:
+              example: nyc3
+  /metadata/v1/interfaces:
+    get:
+      summary: Get Network Interface Index
+      operationId: getInterfaces
+      description: >-
+        An index of all network interfaces by type, e.g. "public" and "private".
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: The available interfaces as plain text.
+          content:
+            text/plain:
+              example: |
+                public/
+                private/
+  /metadata/v1/interfaces/public:
+    get:
+      summary: Get Public Interface Index
+      operationId: getInterfacesPublic
+      description: >-
+        An enumerated index of all public network interfaces that are of the
+        specified interface type.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: An enumerated list of public interfaces as plain text.
+          content:
+            text/plain:
+              example: 0/
+
+  /metadata/v1/interfaces/public/0:
+    get:
+      summary: Get Public Interface Attributes Index
+      operationId: getInterfacesPublicIndex
+      description: >-
+        An index of the attributes of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: >-
+            An index of the Droplet's public interfaces as a plain-text list.
+          content:
+            text/plain:
+              example: |
+                mac
+                type
+                ipv4/
+                ipv6/
+  /metadata/v1/interfaces/public/0/mac:
+    get:
+      summary: Get Public Interface's MAC Address
+      operationId: getInterfacesPublicMac
+      description: The MAC address of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: The Droplet's MAC address as plain text.
+          content:
+            text/plain:
+              example: 04:01:2a:0f:2a:03
+
+  /metadata/v1/interfaces/public/0/type:
+    get:
+      summary: Get Network Interface's Type
+      operationId: getInterfacesPublicType
+      description: The type of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: The network interface type as plain text.
+          content:
+            text/plain:
+              example: public
+
+  /metadata/v1/interfaces/public/0/ipv4:
+    get:
+      summary: Get Public Interface's IPv4 Attributes
+      operationId: getInterfacesPublicIpv4
+      description: >-
+        An index of the specified network interface's IPv4 attributes.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: >-
+            The index of available IPv4 attributes as a plain-text list.
+          content:
+            text/plain:
+              example: |
+                address
+                netmask
+                gateway
+  /metadata/v1/interfaces/public/0/ipv4/address:
+    get:
+      summary: Get Public Interface IPv4 Address
+      operationId: getInterfacesPublicIpv4Address
+      description: >-
+        The IPv4 address of the specified network interface, as plain text.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 104.131.20.105
+
+  /metadata/v1/interfaces/public/0/ipv4/netmask:
+    get:
+      summary: Get Public Interface IPv4 Netmask
+      operationId: getInterfacesPublicIpv4Netmask
+      description: The netmask of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 255.255.192.0
+
+  /metadata/v1/interfaces/public/0/ipv4/gateway:
+    get:
+      summary: Get Public Interface Gateway Address
+      operationId: getInterfacesPublicIpv4Gateway
+      description: The gateway of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 104.131.0.1
+
+  /metadata/v1/interfaces/public/0/ipv6:
+    get:
+      summary: Get IPv6 Network Interfaces Index
+      operationId: getInterfacesIpv6
+      description: >-
+        An index of the specified network interface's IPv6 attributes.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                address
+                cidr
+                gateway
+  /metadata/v1/interfaces/public/0/ipv6/address:
+    get:
+      summary: Get Public Interface IPv6 Address
+      operationId: getInterfacesIpv6Address
+      description: The IPv6 address of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 2604:A880:0800:0010:0000:0000:017D:2001
+
+  /metadata/v1/interfaces/public/0/ipv6/cidr:
+    get:
+      summary: Get Public Interface's IPv6 CIDR
+      operationId: getInterfacesIpv6Cidr
+      description: The IPv6 CIDR of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: "64"
+
+  /metadata/v1/interfaces/public/0/ipv6/gateway:
+    get:
+      summary: Get Public Interface's IPv6 Gateway Address
+      operationId: getInterfacesIpv6Gateway
+      description: The IPv6 gateway address of the specified network interface.
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 2604:A880:0800:0010:0000:0000:0000:0001
+
+  /metadata/v1/interfaces/public/0/anchor_ipv4:
+    get:
+      summary: Get IPv4 Anchor Attributes Index
+      operationId: getInterfacesIpv4AnchorIndex
+      description: >-
+        An index of the specified "Anchor" network interface's IPv4 attributes.
+        **Note:** An "Anchor" interface is an implementation detail of
+        [DigitalOcean Reserved IPs](https://www.digitalocean.com/community/tutorials/how-to-use-floating-ips-on-digitalocean).
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                address
+                netmask
+                gateway
+  /metadata/v1/interfaces/public/0/anchor_ipv4/address:
+    get:
+      summary: Get Anchor IPv4 Address
+      operationId: getInterfacesIpv4AnchorAddress
+      description: >-
+        The IPv4 address of the specified "Anchor" network interface.
+        **Note:** An "Anchor" interface is an implementation detail of
+        [DigitalOcean Reserved IPs](https://www.digitalocean.com/community/tutorials/how-to-use-floating-ips-on-digitalocean).
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 10.17.0.160
+
+  /metadata/v1/interfaces/public/0/anchor_ipv4/netmask:
+    get:
+      summary: Get Anchor IPv4 Netmask
+      operationId: getInterfacesIpv4AnchorNetmask
+      description: >-
+        The netmask of the specified "Anchor" network interface. **Note:**
+        An "Anchor" interface is an implementation detail of
+        [DigitalOcean Reserved IPs](https://www.digitalocean.com/community/tutorials/how-to-use-floating-ips-on-digitalocean).
+      tags:
+        - Network Interfaces
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 255.255.0.0
+
+  /metadata/v1/floating_ip:
+    get:
+      summary: Get Floating IP Index
+      operationId: getFloatingIp
+      description: An index of IPv4 Floating IPs.
+      tags:
+        - Floating IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: ipv4/
+
+  /metadata/v1/reserved_ip:
+    get:
+      summary: Get Reserved IP Index
+      operationId: getReservedIp
+      description: An index of IPv4/IPv6 Reserved IPs.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                ipv4/
+                ipv6/
+
+  /metadata/v1/floating_ip/ipv4:
+    get:
+      summary: Get Floating IPv4 Attributes Index
+      operationId: getFloatingIpIpv4
+      description: An index of IPv4 Floating IP attributes.
+      tags:
+        - Floating IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                active
+                ip_address
+
+  /metadata/v1/reserved_ip/ipv4:
+    get:
+      summary: Get Reserved IPv4 Attributes Index
+      operationId: getReservedIpIpv4
+      description: An index of IPv4 Reserved IP attributes.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                active
+                ip_address
+  
+  /metadata/v1/reserved_ip/ipv6:
+    get:
+      summary: Get Reserved IPv6 Attributes Index
+      operationId: getReservedIpIpv6
+      description: An index of IPv6 Reserved IP attributes.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                active
+                ip_address
+
+  /metadata/v1/floating_ip/ipv4/active:
+    get:
+      summary: Get Floating IPv4 Status
+      operationId: getFloatingIpIpv4Active
+      description: >-
+        Displays true if a Floating IP is currently assigned to the Droplet and
+        false if it is not.
+      tags:
+        - Floating IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: "true"
+
+  /metadata/v1/reserved_ip/ipv4/active:
+    get:
+      summary: Get Reserved IPv4 Status
+      operationId: getReservedIpIpv4Active
+      description: >-
+        Displays true if a Reserved IP is currently assigned to the Droplet and
+        false if it is not.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: "true"
+
+  /metadata/v1/reserved_ip/ipv6/active:
+    get:
+      summary: Get Reserved IPv6 Status
+      operationId: getReservedIpIpv6Active
+      description: >-
+        Displays true if a Reserved IPv6 is currently assigned to the Droplet and
+        false if it is not.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: "true"
+
+
+  /metadata/v1/floating_ip/ipv4/ip_address:
+    get:
+      summary: Get Floating IPv4 Address
+      operationId: getFloatingIpIpv4Address
+      description: >-
+        The IP address of the Floating IP that is currently assigned to the
+        Droplet.
+      tags:
+        - Floating IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 45.55.96.17
+
+  /metadata/v1/reserved_ip/ipv4/ip_address:
+    get:
+      summary: Get Reserved IPv4 Address
+      operationId: getReservedIpIpv4Address
+      description: >-
+        The IP address of the Reserved IP that is currently assigned to the
+        Droplet.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 45.55.96.17
+  
+  /metadata/v1/reserved_ip/ipv6/ip_address:
+    get:
+      summary: Get Reserved IPv6 Address
+      operationId: getReservedIpIpv6Address
+      description: >-
+        The IP address of the Reserved IPv6 that is currently assigned to the
+        Droplet.
+      tags:
+        - Reserved IPs
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: 2604:A880:0800:0010:0000:0000:017D:2001
+
+
+  /metadata/v1/dns:
+    get:
+      summary: Get DNS Attributes Index
+      operationId: getDns
+      description: An index of DNS attributes.
+      tags:
+        - DNS
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: nameservers
+
+  /metadata/v1/dns/nameservers:
+    get:
+      summary: Get DNS Nameservers
+      operationId: getDnsNameservers
+      description: >-
+        The nameserver entries that are added to a Droplet's `/etc/resolv.conf`
+        file during creation.
+      tags:
+        - DNS
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                2001:4860:4860::8844
+                2001:4860:4860::8888
+                8.8.8.8
+  /metadata/v1/tags:
+    get:
+      summary: Get Associated Tags
+      operationId: getTags
+      description: An index of tags associated with the Droplet.
+      tags:
+        - Tags
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: |
+                production
+                application
+                v1
+  /metadata/v1/features:
+    get:
+      summary: Get Available Features
+      operationId: getFeatures
+      description: An index of DigitalOcean features available to the Droplet.
+      tags:
+        - Features
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: dhcp_enabled
+
+  /metadata/v1/features/dhcp_enabled:
+    get:
+      summary: Get DHCP Status
+      operationId: getFeaturesDhcp
+      description: >-
+        Whether or not DHCPv4 and DHCPv6 are available to the Droplet.
+      tags:
+        - Features
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: "true"
+
+  /v1/maintenance_event:
+    get:
+      summary: Get Scheduled Migrations
+      operationId: getScheduledMigrations
+      description: >-
+        Returns the string `live_migrate` at least 10 minutes before a 
+        scheduled migration. If the request returns a blank string, we 
+        have not scheduled the Droplet for a migration.
+      tags:
+        - Features
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              example: "live_migrate"
+              
+components:
+
+  schemas:
+    metadata:
+      type: object
+      properties:
+        droplet_id:
+          type: integer
+          example: 2756294
+        hostname:
+          type: string
+          example: "sample-droplet"
+        vendor_data:
+          type: string
+          example: "#cloud-config\ndisable_root: false\nmanage_etc_hosts: true\n\ncloud_config_modules:\n - ssh\n - set_hostname\n - [ update_etc_hosts, once-per-instance ]\n\ncloud_final_modules:\n - scripts-vendor\n - scripts-per-once\n - scripts-per-boot\n - scripts-per-instance\n - scripts-user\n"
+        public_keys:
+          type: array
+          items:
+              type: string
+          example: ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCcbi6cygCUmuNlB0KqzBpHXf7CFYb3VE4pDOf/RLJ8OFDjOM+fjF83a24QktSVIpQnHYpJJT2pQMBxD+ZmnhTbKv+OjwHSHwAfkBullAojgZKzz+oN35P4Ea4J78AvMrHw0zp5MknS+WKEDCA2c6iDRCq6/hZ13Mn64f6c372JK99X29lj/B4VQpKCQyG8PUSTFkb5DXTETGbzuiVft+vM6SF+0XZH9J6dQ7b4yD3sOder+M0Q7I7CJD4VpdVD/JFa2ycOS4A4dZhjKXzabLQXdkWHvYGgNPGA5lI73TcLUAueUYqdq3RrDRfaQ5Z0PEw0mDllCzhk5dQpkmmqNi0F sammy@digitalocean.com"]
+        region:
+          type: string
+          example: "nyc3"
+        interfaces:
+          $ref: '#/components/schemas/Interfaces'
+        floating_ip:
+          $ref: '#/components/schemas/Floating_ip'
+        reserved_ip:
+          $ref: '#/components/schemas/Reserved_ip'
+        dns:
+          $ref: '#/components/schemas/Dns'
+        features:
+          $ref: '#/components/schemas/Features'
+    Interfaces:
+      type: object
+      properties:
+        private:
+          $ref: '#/components/schemas/Private'
+        public:
+          $ref: '#/components/schemas/Public'
+    Private:
+      type: array
+      items:
+        type: object
+        properties:
+          ipv4:
+            type: object
+            properties:
+              ip_address:
+                type: string
+                example: 104.131.20.105
+              netmask:
+                type: string
+                example: 255.255.192.0
+              gateway:
+                type: string
+                example: 104.131.0.1
+          mac:
+            type: string
+            example: 04:01:2a:0f:2a:01
+          Type:
+            type: string
+            example: private
+    Public:
+      type: array
+      items:
+        type: object
+        properties:
+          ipv4:
+            type: object
+            properties:
+              ip_address:
+                type: string
+                example: 104.131.20.105
+              netmask:
+                type: string
+                example: 255.255.192.0
+              gateway:
+                type: string
+                example: 104.131.0.1
+          ipv6:
+            type: object
+            properties:
+              ip_address:
+                type: string
+                example: 2604:A880:0800:0010:0000:0000:017D:2001
+              cidr:
+                type: integer
+                format: int32
+                example: 64
+              gateway:
+                type: string
+                example: 2604:A880:0800:0010:0000:0000:0000:0001
+          mac:
+            type: string
+            example: 04:01:2a:0f:2a:01
+          Type:
+            type: string
+            example: public
+    Ipv4:
+      type: object
+      properties:
+        ip_address:
+          type: string
+          example: "104.131.20.105"
+        netmask:
+          type: string
+          example: "255.255.192.0"
+        gateway:
+          type: string
+          example: "104.131.0.1"
+    Ipv6:
+      type: object
+      properties:
+        ip_address:
+          type: string
+          example: "104.131.20.105"
+        cidr:
+          type: integer
+          example: 64
+        gateway:
+          type: string
+          example: "104.131.0.1"
+
+    Floating_ip:
+      type: object
+      properties:
+        ipv4:
+          type: object
+          properties:
+            active:
+              type: boolean
+              example: false
+
+    Reserved_ip:
+      type: object
+      properties:
+        ipv4:
+          type: object
+          properties:
+            active:
+              type: boolean
+              example: false
+
+    Dns:
+      type: object
+      properties:
+        nameservers:
+          type: array
+          items:
+            type: string
+          example:
+          - 2001:4860:4860::8844
+          - 2001:4860:4860::8888
+          - 8.8.8.8
+
+    Features:
+      type: object
+      properties:
+        dhcp_enabled:
+          type: boolean
+          example: true
+
+  responses:
+    MovedPermanently:
+      description: >-
+        If you access an index endpoint but forget to add the trailing slash,
+        you will receive a `301 Moved Permanently` response.
+      content:
+        text/plain:
+          example: 301 Moved Permanently
+
+    NotFound:
+      description: >-
+        If you access an endpoint that does not exist, you will receive a
+        `404 Not Found` response. Resolve this by using an existing endpoint.
+      content:
+        text/plain:
+          example: 404 Not Found
