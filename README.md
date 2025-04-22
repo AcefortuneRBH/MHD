@@ -1,297 +1,330 @@
-## MHD Blockchain Deployment Guide
+[![Build and Test](https://github.com/actions/checkout/actions/workflows/test.yml/badge.svg)](https://github.com/actions/checkout/actions/workflows/test.yml)
 
-### Prerequisites
+# Checkout V4
 
-*   Ubuntu Server
-*   Node.js and npm
-*   Git
-*   Hardhat
-*   Etherscan API Key
+This action checks-out your repository under `$GITHUB_WORKSPACE`, so your workflow can access it.
 
-### Deployment Steps
+Only a single commit is fetched by default, for the ref/SHA that triggered the workflow. Set `fetch-depth: 0` to fetch all history for all branches and tags. Refer [here](https://docs.github.com/actions/using-workflows/events-that-trigger-workflows) to learn which commit `$GITHUB_SHA` points to for different events.
 
-1.  **Server Setup:**
-    *   Create an Ubuntu server instance on your chosen cloud provider or VPS.
-    *   Connect to the server via SSH.
-    *   Update the server: `sudo apt update && sudo apt upgrade -y`
-    *   Install necessary tools: `sudo apt install -y nodejs npm git`
+The auth token is persisted in the local git config. This enables your scripts to run authenticated git commands. The token is removed during post-job cleanup. Set `persist-credentials: false` to opt-out.
 
-2.  **Project Transfer:**
-    *   On your local machine, navigate to the MHD-Blockchain project directory.
-    *   Use `scp` to copy the project to the server:
-        ```bash
-        scp -r . username@server_ip:/path/to/destination
-        ```
+When Git 2.18 or higher is not in your PATH, falls back to the REST API to download the files.
 
-3.  **Environment Configuration:**
-    *   On the server, navigate to the project directory.
-    *   Create a `.env` file with the following variables:
-        ```
-        SEPOLIA_URL=YOUR_SEPOLIA_RPC_URL
-        PRIVATE_KEY=YOUR_PRIVATE_KEY
-        ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
-        ```
-        Replace `YOUR_SEPOLIA_RPC_URL` with your Sepolia RPC URL, `YOUR_PRIVATE_KEY` with your private key, and `YOUR_ETHERSCAN_API_KEY` with your Etherscan API key.
-    *   Install Hardhat dependencies: `npm install`
+# What's new
 
-4.  **Contract Deployment:**
-    *   Execute the `deploy.sh` script to deploy the contracts:
-        ```bash
-        chmod +x deploy.sh
-        ./deploy.sh sepolia
-        ```
-        Replace `sepolia` with the desired network (e.g., `sepolia`).
+Please refer to the [release page](https://github.com/actions/checkout/releases/latest) for the latest release notes.
 
-5.  **Verification:**
-    *   The script attempts to automatically verify the contract on Etherscan after deployment.
-## MHD Blockchain Deployment Guide
+# Usage
 
-### Prerequisites
+<!-- start usage -->
+```yaml
+- uses: actions/checkout@v4
+  with:
+    # Repository name with owner. For example, actions/checkout
+    # Default: ${{ github.repository }}
+    repository: ''
 
-*   Ubuntu Server
-*   Node.js and npm
-*   Git
-*   Hardhat
-*   Etherscan API Key
+    # The branch, tag or SHA to checkout. When checking out the repository that
+    # triggered a workflow, this defaults to the reference or SHA for that event.
+    # Otherwise, uses the default branch.
+    ref: ''
 
-### Deployment Steps
+    # Personal access token (PAT) used to fetch the repository. The PAT is configured
+    # with the local git config, which enables your scripts to run authenticated git
+    # commands. The post-job step removes the PAT.
+    #
+    # We recommend using a service account with the least permissions necessary. Also
+    # when generating a new PAT, select the least scopes necessary.
+    #
+    # [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+    #
+    # Default: ${{ github.token }}
+    token: ''
 
-1.  **Server Setup:**
-    *   Create an Ubuntu server instance on your chosen cloud provider or VPS.
-    *   Connect to the server via SSH.
-    *   Update the server: `sudo apt update && sudo apt upgrade -y`
-    *   Install necessary tools: `sudo apt install -y nodejs npm git`
+    # SSH key used to fetch the repository. The SSH key is configured with the local
+    # git config, which enables your scripts to run authenticated git commands. The
+    # post-job step removes the SSH key.
+    #
+    # We recommend using a service account with the least permissions necessary.
+    #
+    # [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+    ssh-key: ''
 
-2.  **Project Transfer:**
-    *   On your local machine, navigate to the MHD-Blockchain project directory.
-    *   Use `scp` to copy the project to the server:
-        ```bash
-        scp -r . username@server_ip:/path/to/destination
-        ```
+    # Known hosts in addition to the user and global host key database. The public SSH
+    # keys for a host may be obtained using the utility `ssh-keyscan`. For example,
+    # `ssh-keyscan github.com`. The public key for github.com is always implicitly
+    # added.
+    ssh-known-hosts: ''
 
-3.  **Environment Configuration:**
-    *   On the server, navigate to the project directory.
-    *   Create a `.env` file with the following variables:
-        ```
-        SEPOLIA_URL=YOUR_SEPOLIA_RPC_URL
-        PRIVATE_KEY=YOUR_PRIVATE_KEY
-        ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
-        ```
-        Replace `YOUR_SEPOLIA_RPC_URL` with your Sepolia RPC URL, `YOUR_PRIVATE_KEY` with your private key, and `YOUR_ETHERSCAN_API_KEY` with your Etherscan API key.
-    *   Install Hardhat dependencies: `npm install`
+    # Whether to perform strict host key checking. When true, adds the options
+    # `StrictHostKeyChecking=yes` and `CheckHostIP=no` to the SSH command line. Use
+    # the input `ssh-known-hosts` to configure additional hosts.
+    # Default: true
+    ssh-strict: ''
 
-4.  **Contract Deployment:**
-    *   Execute the `deploy.sh` script to deploy the contracts:
-        ```bash
-        chmod +x deploy.sh
-        ./deploy.sh sepolia
-        ```
-        Replace `sepolia` with the desired network (e.g., `sepolia`).
+    # The user to use when connecting to the remote SSH host. By default 'git' is
+    # used.
+    # Default: git
+    ssh-user: ''
 
-5.  **Verification:**
-    *   The script attempts to automatically verify the contract on Etherscan after deployment.
-## MHD Blockchain Deployment Guide
+    # Whether to configure the token or SSH key with the local git config
+    # Default: true
+    persist-credentials: ''
 
-### Prerequisites
+    # Relative path under $GITHUB_WORKSPACE to place the repository
+    path: ''
 
-*   Ubuntu Server
-*   Node.js and npm
-*   Git
-*   Hardhat
-*   Etherscan API Key
+    # Whether to execute `git clean -ffdx && git reset --hard HEAD` before fetching
+    # Default: true
+    clean: ''
 
-### Deployment Steps
+    # Partially clone against a given filter. Overrides sparse-checkout if set.
+    # Default: null
+    filter: ''
 
-1.  **Server Setup:**
-    *   Create an Ubuntu server instance on your chosen cloud provider or VPS.
-    *   Connect to the server via SSH.
-    *   Update the server: `sudo apt update && sudo apt upgrade -y`
-    *   Install necessary tools: `sudo apt install -y nodejs npm git`
+    # Do a sparse checkout on given patterns. Each pattern should be separated with
+    # new lines.
+    # Default: null
+    sparse-checkout: ''
 
-2.  **Project Transfer:**
-    *   On your local machine, navigate to the MHD-Blockchain project directory.
-    *   Use `scp` to copy the project to the server:
-        ```bash
-        scp -r . username@server_ip:/path/to/destination
-        ```
+    # Specifies whether to use cone-mode when doing a sparse checkout.
+    # Default: true
+    sparse-checkout-cone-mode: ''
 
-3.  **Environment Configuration:**
-    *   On the server, navigate to the project directory.
-    *   Create a `.env` file with the following variables:
-        ```
-        SEPOLIA_URL=YOUR_SEPOLIA_RPC_URL
-        PRIVATE_KEY=YOUR_PRIVATE_KEY
-        ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
-        ```
-        Replace `YOUR_SEPOLIA_RPC_URL` with your Sepolia RPC URL, `YOUR_PRIVATE_KEY` with your private key, and `YOUR_ETHERSCAN_API_KEY` with your Etherscan API key.
-    *   Install Hardhat dependencies: `npm install`
+    # Number of commits to fetch. 0 indicates all history for all branches and tags.
+    # Default: 1
+    fetch-depth: ''
 
-4.  **Contract Deployment:**
-    *   Execute the `deploy.sh` script to deploy the contracts:
-        ```bash
-        chmod +x deploy.sh
-        ./deploy.sh sepolia
-        ```
-        Replace `sepolia` with the desired network (e.g., `sepolia`).
+    # Whether to fetch tags, even if fetch-depth > 0.
+    # Default: false
+    fetch-tags: ''
 
-5.  **Verification:**
-    *   The script attempts to automatically verify the contract on Etherscan after deployment.
-## MHD Blockchain Deployment Guide
+    # Whether to show progress status output when fetching.
+    # Default: true
+    show-progress: ''
 
-### Prerequisites
+    # Whether to download Git-LFS files
+    # Default: false
+    lfs: ''
 
-*   Ubuntu Server
-*   Node.js and npm
-*   Git
-*   Hardhat
-*   Etherscan API Key
+    # Whether to checkout submodules: `true` to checkout submodules or `recursive` to
+    # recursively checkout submodules.
+    #
+    # When the `ssh-key` input is not provided, SSH URLs beginning with
+    # `git@github.com:` are converted to HTTPS.
+    #
+    # Default: false
+    submodules: ''
 
-### Deployment Steps
+    # Add repository path as safe.directory for Git global config by running `git
+    # config --global --add safe.directory <path>`
+    # Default: true
+    set-safe-directory: ''
 
-1.  **Server Setup:**
-    *   Create an Ubuntu server instance on your chosen cloud provider or VPS.
-    *   Connect to the server via SSH.
-    *   Update the server: `sudo apt update && sudo apt upgrade -y`
-    *   Install necessary tools: `sudo apt install -y nodejs npm git`
+    # The base URL for the GitHub instance that you are trying to clone from, will use
+    # environment defaults to fetch from the same instance that the workflow is
+    # running from unless specified. Example URLs are https://github.com or
+    # https://my-ghes-server.example.com
+    github-server-url: ''
+```
+<!-- end usage -->
 
-2.  **Project Transfer:**
-    *   On your local machine, navigate to the MHD-Blockchain project directory.
-    *   Use `scp` to copy the project to the server:
-        ```bash
-        scp -r . username@server_ip:/path/to/destination
-        ```
+# Scenarios
 
-3.  **Environment Configuration:**
-    *   On the server, navigate to the project directory.
-    *   Create a `.env` file with the following variables:
-        ```
-        SEPOLIA_URL=YOUR_SEPOLIA_RPC_URL
-        PRIVATE_KEY=YOUR_PRIVATE_KEY
-        ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
-        ```
-        Replace `YOUR_SEPOLIA_RPC_URL` with your Sepolia RPC URL, `YOUR_PRIVATE_KEY` with your private key, and `YOUR_ETHERSCAN_API_KEY` with your Etherscan API key.
-    *   Install Hardhat dependencies: `npm install`
+- [Fetch only the root files](#fetch-only-the-root-files)
+- [Fetch only the root files and `.github` and `src` folder](#fetch-only-the-root-files-and-github-and-src-folder)
+- [Fetch only a single file](#fetch-only-a-single-file)
+- [Fetch all history for all tags and branches](#fetch-all-history-for-all-tags-and-branches)
+- [Checkout a different branch](#checkout-a-different-branch)
+- [Checkout HEAD^](#checkout-head)
+- [Checkout multiple repos (side by side)](#checkout-multiple-repos-side-by-side)
+- [Checkout multiple repos (nested)](#checkout-multiple-repos-nested)
+- [Checkout multiple repos (private)](#checkout-multiple-repos-private)
+- [Checkout pull request HEAD commit instead of merge commit](#checkout-pull-request-head-commit-instead-of-merge-commit)
+- [Checkout pull request on closed event](#checkout-pull-request-on-closed-event)
+- [Push a commit using the built-in token](#push-a-commit-using-the-built-in-token)
+- [Push a commit to a PR using the built-in token](#push-a-commit-to-a-pr-using-the-built-in-token)
 
-4.  **Contract Deployment:**
-    *   Execute the `deploy.sh` script to deploy the contracts:
-        ```bash
-        chmod +x deploy.sh
-        ./deploy.sh sepolia
-        ```
-        Replace `sepolia` with the desired network (e.g., `sepolia`).
+## Fetch only the root files
 
-5.  **Verification:**
-    *   The script attempts to automatically verify the contract on Etherscan after deployment.
-## MHD Blockchain Deployment Guide
+```yaml
+- uses: actions/checkout@v4
+  with:
+    sparse-checkout: .
+```
 
-### Prerequisites
+## Fetch only the root files and `.github` and `src` folder
 
-*   Ubuntu Server
-*   Node.js and npm
-*   Git
-*   Hardhat
-*   Etherscan API Key
+```yaml
+- uses: actions/checkout@v4
+  with:
+    sparse-checkout: |
+      .github
+      src
+```
 
-### Deployment Steps
+## Fetch only a single file
 
-1.  **Server Setup:**
-    *   Create an Ubuntu server instance on your chosen cloud provider or VPS.
-    *   Connect to the server via SSH.
-    *   Update the server: `sudo apt update && sudo apt upgrade -y`
-    *   Install necessary tools: `sudo apt install -y nodejs npm git`
+```yaml
+- uses: actions/checkout@v4
+  with:
+    sparse-checkout: |
+      README.md
+    sparse-checkout-cone-mode: false
+```
 
-2.  **Project Transfer:**
-    *   On your local machine, navigate to the MHD-Blockchain project directory.
-    *   Use `scp` to copy the project to the server:
-        ```bash
-        scp -r . username@server_ip:/path/to/destination
-        ```
+## Fetch all history for all tags and branches
 
-3.  **Environment Configuration:**
-    *   On the server, navigate to the project directory.
-    *   Create a `.env` file with the following variables:
-        ```
-        SEPOLIA_URL=YOUR_SEPOLIA_RPC_URL
-        PRIVATE_KEY=YOUR_PRIVATE_KEY
-        ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
-        ```
-        Replace `YOUR_SEPOLIA_RPC_URL` with your Sepolia RPC URL, `YOUR_PRIVATE_KEY` with your private key, and `YOUR_ETHERSCAN_API_KEY` with your Etherscan API key.
-    *   Install Hardhat dependencies: `npm install`
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+```
 
-4.  **Contract Deployment:**
-    *   Execute the `deploy.sh` script to deploy the contracts:
-        ```bash
-        chmod +x deploy.sh
-        ./deploy.sh sepolia
-        ```
-        Replace `sepolia` with the desired network (e.g., `sepolia`).
+## Checkout a different branch
 
-5.  **Verification:**
-    *   The script attempts to automatically verify the contract on Etherscan after deployment.
-# MHD
-The Coin that will bring prosperities to all 🤲
+```yaml
+- uses: actions/checkout@v4
+  with:
+    ref: my-branch
+```
 
-## MHD Blockchain Deployment Guide
+## Checkout HEAD^
 
-### Prerequisites
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 2
+- run: git checkout HEAD^
+```
 
-*   Ubuntu Server
-*   Node.js and npm
-*   Git
-*   Hardhat
-*   Etherscan API Key
+## Checkout multiple repos (side by side)
 
-### Deployment Steps
+```yaml
+- name: Checkout
+  uses: actions/checkout@v4
+  with:
+    path: main
 
-1.  **Server Setup:**
-    *   Create an Ubuntu server instance on your chosen cloud provider or VPS.
-    *   Connect to the server via SSH.
-    *   Update the server: `sudo apt update && sudo apt upgrade -y`
-    *   Install necessary tools: `sudo apt install -y nodejs npm git`
+- name: Checkout tools repo
+  uses: actions/checkout@v4
+  with:
+    repository: my-org/my-tools
+    path: my-tools
+```
+>
+> - If your secondary repository is private or internal you will need to add the option noted in [Checkout multiple repos (private)](#checkout-multiple-repos-private)
 
-2.  **Project Transfer:**
-    *   On your local machine, navigate to the MHD-Blockchain project directory.
-    *   Use `scp` to copy the project to the server:
-        ```bash
-        scp -r . username@server_ip:/path/to/destination
-        ```
+## Checkout multiple repos (nested)
 
-3.  **Environment Configuration:**
-    *   On the server, navigate to the project directory.
-    *   Create a `.env` file with the following variables:
-        ```
-        SEPOLIA_URL=YOUR_SEPOLIA_RPC_URL
-        PRIVATE_KEY=YOUR_PRIVATE_KEY
-        ETHERSCAN_API_KEY=YOUR_ETHERSCAN_API_KEY
-        ```
-        Replace `YOUR_SEPOLIA_RPC_URL` with your Sepolia RPC URL, `YOUR_PRIVATE_KEY` with your private key, and `YOUR_ETHERSCAN_API_KEY` with your Etherscan API key.
-    *   Install Hardhat dependencies: `npm install`
+```yaml
+- name: Checkout
+  uses: actions/checkout@v4
 
-4.  **Contract Deployment:**
-    *   Execute the `deploy.sh` script to deploy the contracts:
-        ```bash
-        chmod +x deploy.sh
-        ./deploy.sh sepolia
-        ```
-        Replace `sepolia` with the desired network (e.g., `sepolia`).
+- name: Checkout tools repo
+  uses: actions/checkout@v4
+  with:
+    repository: my-org/my-tools
+    path: my-tools
+```
+>
+> - If your secondary repository is private or internal you will need to add the option noted in [Checkout multiple repos (private)](#checkout-multiple-repos-private)
 
-5.  **Verification:**
-    *   The script attempts to automatically verify the contract on Etherscan after deployment.
+## Checkout multiple repos (private)
 
-6.  **Execute MHD Node:**
-    *   After contract deployment, the script executes the MHD node. Ensure the `mhd_node` executable is in the `./build/` directory.
+```yaml
+- name: Checkout
+  uses: actions/checkout@v4
+  with:
+    path: main
 
-7.  **Process Management:**
-    *   Install PM2: `npm install -g pm2`
-    *   Start the application using PM2: `pm2 start app.js` (or the relevant entry point).
+- name: Checkout private tools
+  uses: actions/checkout@v4
+  with:
+    repository: my-org/my-private-tools
+    token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+    path: my-tools
+```
 
-8.  **Reverse Proxy Setup:**
-    *   Install Nginx: `sudo apt install nginx -y`
-    *   Configure Nginx to forward requests to the application.
+> - `${{ github.token }}` is scoped to the current repository, so if you want to checkout a different repository that is private you will need to provide your own [PAT](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line).
 
-9.  **Firewall Configuration:**
-    *   Enable UFW: `sudo ufw enable`
-    *   Allow SSH, HTTP, and HTTPS traffic: `sudo ufw allow OpenSSH`, `sudo ufw allow 'Nginx HTTP'`, `sudo ufw allow 'Nginx HTTPS'`
+## Checkout pull request HEAD commit instead of merge commit
 
-10.  **Monitoring:**
-    *   Set up monitoring tools (e.g., Prometheus, Grafana) to track application performance and errors.
+```yaml
+- uses: actions/checkout@v4
+  with:
+    ref: ${{ github.event.pull_request.head.sha }}
+```
+
+## Checkout pull request on closed event
+
+```yaml
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, closed]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+```
+
+## Push a commit using the built-in token
+
+```yaml
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          date > generated.txt
+          # Note: the following account information will not work on GHES
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "generated"
+          git push
+```
+
+*NOTE:* The user email is `{user.id}+{user.login}@users.noreply.github.com`. See users API: <https://api.github.com/users/github-actions%5Bbot%5D>
+
+## Push a commit to a PR using the built-in token
+
+In a pull request trigger, `ref` is required as GitHub Actions checks out in detached HEAD mode, meaning it doesn’t check out your branch by default.
+
+```yaml
+on: pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - run: |
+          date > generated.txt
+          # Note: the following account information will not work on GHES
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "generated"
+          git push
+```
+
+*NOTE:* The user email is `{user.id}+{user.login}@users.noreply.github.com`. See users API: <https://api.github.com/users/github-actions%5Bbot%5D>
+
+# Recommended permissions
+
+When using the `checkout` action in your GitHub Actions workflow, it is recommended to set the following `GITHUB_TOKEN` permissions to ensure proper functionality, unless alternative auth is provided via the `token` or `ssh-key` inputs:
+
+```yaml
+permissions:
+  contents: read
+```
+
+# License
+
+The scripts and documentation in this project are released under the [MIT License](LICENSE)
